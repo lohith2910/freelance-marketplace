@@ -1,0 +1,167 @@
+{% extends "marketplace/base.html" %}
+
+{% block title %}{{ project.title }} - FreelanceX{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <div class="eyebrow">Project detail</div>
+        <h1>{{ project.title }}</h1>
+        <p class="muted mb-0">Client: {{ project.client.username }} - Posted {{ project.created_at|date:"M d, Y" }}</p>
+    </div>
+    <span class="badge-soft">{% if project.accepted %}In Progress{% else %}Open for Bidding{% endif %}</span>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="panel">
+            <h2 class="h4">Description</h2>
+            <p class="muted">{{ project.description }}</p>
+
+            <div class="d-flex justify-content-between align-items-center gap-3 mt-4 mb-3 flex-wrap">
+                <h2 class="h4 mb-0">Milestones</h2>
+                <span class="badge-soft">
+                    {% if project.milestone1 and project.milestone2 and project.milestone3 %}
+                        Completed
+                    {% elif project.milestone1 or project.milestone2 or project.milestone3 %}
+                        In Progress
+                    {% else %}
+                        Not Started
+                    {% endif %}
+                </span>
+            </div>
+
+            {% if project.client.id == request.user.id or user_role == 'admin' %}
+                <form method="POST" action="{% url 'update_milestones' project.id %}" class="d-grid gap-3">
+                    {% csrf_token %}
+                    <label class="card-dark d-flex justify-content-between align-items-center gap-3">
+                        <span>
+                            <strong>Requirement Analysis</strong>
+                            <span class="muted d-block">Client and freelancer agree on scope.</span>
+                        </span>
+                        <input type="checkbox" name="milestone1" class="form-check-input" {% if project.milestone1 %}checked{% endif %}>
+                    </label>
+                    <label class="card-dark d-flex justify-content-between align-items-center gap-3">
+                        <span>
+                            <strong>Development Phase</strong>
+                            <span class="muted d-block">Main implementation work is completed.</span>
+                        </span>
+                        <input type="checkbox" name="milestone2" class="form-check-input" {% if project.milestone2 %}checked{% endif %}>
+                    </label>
+                    <label class="card-dark d-flex justify-content-between align-items-center gap-3">
+                        <span>
+                            <strong>Final Delivery</strong>
+                            <span class="muted d-block">Final files, review, and delivery are done.</span>
+                        </span>
+                        <input type="checkbox" name="milestone3" class="form-check-input" {% if project.milestone3 %}checked{% endif %}>
+                    </label>
+                    <button type="submit" class="btn-app">Update Milestones</button>
+                </form>
+
+                <hr class="border-secondary my-4">
+
+                <div class="mb-3">
+                    <h3 class="h4 text-white mb-3"><i class="bi bi-list-ul me-1"></i> Bids Received</h3>
+                    {% if bids %}
+                        <div class="d-grid gap-3">
+                            {% for bid in bids %}
+                                <div class="card-dark border {% if bid.accepted %}border-success{% else %}border-secondary{% endif %} p-3 rounded d-flex justify-content-between align-items-center gap-3 flex-wrap">
+                                    <div style="flex: 1; min-width: 280px;">
+                                        <div class="d-flex align-items-center gap-2 mb-1">
+                                            <span class="text-white font-weight-bold fs-5">{{ bid.freelancer.username }}</span>
+                                            {% if bid.accepted %}
+                                                <span class="badge bg-success text-white small px-2 py-0.5"><i class="bi bi-check-circle-fill"></i> Accepted Bid</span>
+                                            {% endif %}
+                                        </div>
+                                        <span class="text-info font-weight-bold">Rs. {{ bid.amount }}</span>
+                                        <span class="muted small mx-2">|</span>
+                                        <span class="muted small"><i class="bi bi-clock"></i> Delivery in {{ bid.delivery_days }} days</span>
+                                        <span class="muted small mx-2">|</span>
+                                        <span class="small {% if bid.plagiarism_percentage == 0 %}text-success{% else %}text-danger{% endif %}">
+                                            <i class="bi bi-shield-check"></i> {{ bid.plagiarism_percentage }}% Plagiarism
+                                        </span>
+                                        <p class="text-muted small mt-2 mb-0 italic">"{{ bid.proposal }}"</p>
+                                        
+                                        {% if bid.resume %}
+                                            <div class="mt-2">
+                                                <a href="{{ bid.resume.url }}" target="_blank" class="badge-soft text-decoration-none small"><i class="bi bi-file-earmark-pdf"></i> View Resume</a>
+                                            </div>
+                                        {% elif bid.freelancer.profile.resume %}
+                                            <div class="mt-2">
+                                                <a href="{{ bid.freelancer.profile.resume.url }}" target="_blank" class="badge-soft text-decoration-none small"><i class="bi bi-file-earmark-pdf"></i> View Resume</a>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="d-flex gap-2 align-items-center">
+                                        <a href="{% url 'chat' project.id bid.freelancer.id %}" class="btn-app secondary btn-sm"><i class="bi bi-chat-left-text"></i> Chat</a>
+                                        {% if not project.accepted %}
+                                            <a href="{% url 'accept_bid' bid.id %}" class="btn-app btn-sm px-3"><i class="bi bi-check-lg"></i> Accept Bid</a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="card-dark p-4 text-center">
+                            <i class="bi bi-list-stars text-muted fs-2 mb-2"></i>
+                            <p class="muted mb-0">No bids have been placed on this project yet.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            {% else %}
+                <div class="grid">
+                    <div class="card-dark">
+                        <strong>Requirement Analysis</strong>
+                        <p class="muted mb-0">{% if project.milestone1 %}Completed{% else %}Pending{% endif %}</p>
+                    </div>
+                    <div class="card-dark">
+                        <strong>Development Phase</strong>
+                        <p class="muted mb-0">{% if project.milestone2 %}Completed{% else %}Pending{% endif %}</p>
+                    </div>
+                    <div class="card-dark">
+                        <strong>Final Delivery</strong>
+                        <p class="muted mb-0">{% if project.milestone3 %}Completed{% else %}Pending{% endif %}</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <aside class="panel">
+            <p class="muted mb-1">Budget</p>
+            <h2>Rs. {{ project.budget }}</h2>
+            <hr class="border-secondary">
+
+            {% if user_role == "freelancer" and not project.accepted and project.client.id != request.user.id %}
+                <a href="{% url 'place_bid' project.id %}" class="btn-app w-100 mb-3">
+                    <i class="bi bi-cash-stack"></i> {% if has_bid %}Update Bid{% else %}Place Bid{% endif %}
+                </a>
+                <a href="{% url 'chat' project.id project.client.id %}" class="btn-app secondary w-100">
+                    <i class="bi bi-chat-left-text"></i> Contact Client
+                </a>
+            {% elif project.client.id == request.user.id or user_role == 'admin' %}
+                <a href="{% url 'project_bids' project.id %}" class="btn-app secondary w-100 mb-3">
+                    <i class="bi bi-list-ul"></i> View Bids
+                </a>
+                {% if project.accepted %}
+                    <a href="{% url 'payment' project.id %}" class="btn-app w-100">
+                        <i class="bi bi-credit-card"></i> Pay Freelancer
+                    </a>
+                {% endif %}
+            {% elif not request.user.is_authenticated %}
+                <a href="{% url 'login' %}" class="btn-app w-100 mb-3">
+                    <i class="bi bi-cash-stack"></i> Login to Place Bid
+                </a>
+                <a href="{% url 'login' %}" class="btn-app secondary w-100">
+                    <i class="bi bi-lightning-charge"></i> Login to Quick Apply
+                </a>
+            {% else %}
+                <div class="card-dark border-secondary p-3 text-center">
+                    <i class="bi bi-info-circle text-info fs-4 mb-2"></i>
+                    <p class="muted mb-0 small">Bidding and application actions are reserved for freelancer accounts. Access your user options from the dashboard.</p>
+                </div>
+            {% endif %}
+        </aside>
+    </div>
+</div>
+{% endblock %}

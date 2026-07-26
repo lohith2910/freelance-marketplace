@@ -1,0 +1,26 @@
+{% extends "marketplace/base.html" %}
+
+{% block title %}Notifications - FreelanceX{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <div class="eyebrow">Activity</div>
+        <h1>Notifications</h1>
+    </div>
+    <a href="{% url 'dashboard' %}" class="btn-app secondary">Dashboard</a>
+</div>
+
+<div class="d-grid gap-3">
+    {% for notification in notifications %}
+        <article class="card-dark">
+            <p class="mb-2">{{ notification.message }}</p>
+            <small class="muted">{{ notification.created_at|date:"M d, Y H:i" }}</small>
+        </article>
+    {% empty %}
+        <div class="panel">
+            <p class="muted mb-0">No notifications yet.</p>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

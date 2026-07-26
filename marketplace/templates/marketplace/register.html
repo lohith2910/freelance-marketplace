@@ -1,0 +1,50 @@
+{% extends "marketplace/base.html" %}
+
+{% block title %}Register - FreelanceX{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="panel">
+            <div class="eyebrow">Join the marketplace</div>
+            <h1 class="mb-4">Create Account</h1>
+            <form method="POST" enctype="multipart/form-data" id="registerForm">
+                {% csrf_token %}
+                {{ form.as_p }}
+                {{ profile_form.as_p }}
+                <button type="submit" class="btn-app w-100">Register</button>
+            </form>
+            <p class="muted text-center mt-4 mb-0">
+                Already have an account? <a href="{% url 'login' %}">Login</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const roleSelect = document.querySelector('select[name="role"]');
+        const resumeInput = document.querySelector('input[name="resume"]');
+        
+        if (roleSelect && resumeInput) {
+            const resumeContainer = resumeInput.closest('p');
+            
+            function toggleResume() {
+                if (roleSelect.value === 'freelancer') {
+                    if (resumeContainer) resumeContainer.style.display = 'block';
+                    resumeInput.required = true;
+                } else {
+                    if (resumeContainer) resumeContainer.style.display = 'none';
+                    resumeInput.required = false;
+                    resumeInput.value = ''; // Clear file if they switched back to Client
+                }
+            }
+            
+            roleSelect.addEventListener('change', toggleResume);
+            toggleResume(); // Set initial state on load
+        }
+    });
+</script>
+{% endblock %}

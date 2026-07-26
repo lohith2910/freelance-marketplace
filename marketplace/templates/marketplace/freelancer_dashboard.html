@@ -1,0 +1,123 @@
+{% extends "marketplace/base.html" %}
+
+{% block title %}Freelancer Dashboard - FreelanceX{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <div class="eyebrow">Freelancer workspace</div>
+        <h1>Freelancer Dashboard</h1>
+        <p class="muted mb-0">Track applications, bids, accepted work, messages, and earnings.</p>
+    </div>
+    <a href="{% url 'projects' %}" class="btn-app">Find Projects</a>
+</div>
+
+<div class="grid mb-5">
+    <div class="panel stat"><strong>{{ bids|length }}</strong><p class="muted mb-0">Submitted Bids</p></div>
+    <div class="panel stat"><strong>{{ active_projects }}</strong><p class="muted mb-0">Active Projects</p></div>
+    <div class="panel stat"><strong class="text-success">Rs. {{ total_earnings }}</strong><p class="muted mb-0">Cleared Earnings</p></div>
+    <div class="panel stat"><strong class="text-warning">Rs. {{ pending_earnings }}</strong><p class="muted mb-0">Pending Earnings</p></div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8 col-md-12">
+        <section class="mb-5">
+            <h2 class="mb-3">Your Bids & Projects</h2>
+            <div class="d-grid gap-3">
+                {% for bid in bids %}
+                    <article class="card-dark d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="d-flex justify-content-between gap-3 mb-3">
+                                <h3 class="h5 mb-0">{{ bid.project.title }}</h3>
+                                <div class="d-flex gap-2">
+                                    <span class="badge-soft">{% if bid.accepted %}Accepted{% else %}Pending{% endif %}</span>
+                                    {% if bid.accepted %}
+                                        {% if bid.project.is_paid %}
+                                            <span class="badge-soft bg-success text-white px-2 py-1"><i class="bi bi-shield-check"></i> Cleared</span>
+                                        {% else %}
+                                            <span class="badge-soft bg-warning text-black px-2 py-1"><i class="bi bi-clock"></i> Unpaid</span>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <p class="muted mb-3">{{ bid.proposal|truncatewords:22 }}</p>
+                            <p class="fw-bold mb-2">Bid Amount: Rs. {{ bid.amount }} - {{ bid.delivery_days }} days</p>
+        
+                            {% if bid.accepted %}
+                                <!-- Milestones Progress Tracker -->
+                                <div class="mb-3 p-2 rounded bg-opacity-10 bg-info card-dark">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="small text-white font-weight-bold">Milestones Status</span>
+                                        <span class="small badge-soft">
+                                            {% if bid.project.milestone1 and bid.project.milestone2 and bid.project.milestone3 %}
+                                                3/3 Completed
+                                            {% elif bid.project.milestone1 or bid.project.milestone2 or bid.project.milestone3 %}
+                                                {% if bid.project.milestone1 and bid.project.milestone2 %}2/3 Done
+                                                {% elif bid.project.milestone1 %}1/3 Done
+                                                {% elif bid.project.milestone2 %}1/3 Done
+                                                {% else %}1/3 Done{% endif %}
+                                            {% else %}
+                                                0/3 Done
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                    <div class="progress" style="height: 6px; background-color: var(--line);">
+                                        <div class="progress-bar bg-info" role="progressbar" 
+                                             style="{% if bid.project.milestone1 and bid.project.milestone2 and bid.project.milestone3 %}width: 100%{% elif bid.project.milestone1 and bid.project.milestone2 %}width: 66%{% elif bid.project.milestone1 or bid.project.milestone2 or bid.project.milestone3 %}width: 33%{% else %}width: 0%{% endif %}">
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="d-flex gap-2 flex-wrap mt-3 pt-3 border-top border-secondary">
+                            <a href="{% url 'project_detail' bid.project.id %}" class="btn-app secondary btn-sm px-3"><i class="bi bi-eye"></i> View Project</a>
+                            <a href="{% url 'chat' bid.project.id bid.project.client.id %}" class="btn-app secondary btn-sm px-3"><i class="bi bi-chat-left-text"></i> Chat Client</a>
+                        </div>
+                    </article>
+                {% empty %}
+                    <div class="panel"><p class="muted mb-0">No bids submitted yet.</p></div>
+                {% endfor %}
+            </div>
+        </section>
+        
+        <section>
+            <h2 class="mb-3">Applications</h2>
+            <div class="d-grid gap-3">
+                {% for application in applications %}
+                    <article class="card-dark">
+                        <h3 class="h5">{{ application.project.title }}</h3>
+                        <p class="muted">{{ application.project.description|truncatewords:20 }}</p>
+                        <div class="d-flex gap-2 flex-wrap mt-3">
+                            <a href="{% url 'project_detail' application.project.id %}" class="btn-app secondary"><i class="bi bi-eye"></i> View Project</a>
+                            <a href="{% url 'place_bid' application.project.id %}" class="btn-app"><i class="bi bi-cash-stack"></i> Place Bid</a>
+                        </div>
+                    </article>
+                {% empty %}
+                    <div class="panel"><p class="muted mb-0">No quick applications yet.</p></div>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+    
+    <!-- Notifications Sidebar -->
+    <div class="col-lg-4 col-md-12">
+        <h2 class="mb-3">Recent Activity</h2>
+        <div class="panel">
+            <div class="d-grid gap-3">
+                {% for notification in recent_notifications %}
+                    <div class="pb-3 border-bottom border-secondary" style="font-size: 13px;">
+                        <p class="mb-1 text-white">{{ notification.message }}</p>
+                        <span class="text-muted small"><i class="bi bi-clock me-1"></i>{{ notification.created_at|date:"M d, H:i" }}</span>
+                    </div>
+                {% empty %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-bell-slash fs-4 d-block mb-2"></i>
+                        No recent activity.
+                    </div>
+                {% endfor %}
+            </div>
+            <a href="{% url 'notifications' %}" class="btn-app secondary w-100 mt-3 btn-sm"><i class="bi bi-eye"></i> View All Activity</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "marketplace/base.html" %}
+
+{% block title %}Bids - FreelanceX{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <div class="eyebrow">Bids</div>
+        <h1>{{ project.title }}</h1>
+        <p class="muted mb-0">Compare proposals and accept the best freelancer.</p>
+    </div>
+    <a href="{% url 'client_dashboard' %}" class="btn-app secondary">Back</a>
+</div>
+
+<div class="grid">
+    {% for bid in bids %}
+        <article class="card-dark">
+            <div class="d-flex justify-content-between gap-3 mb-3">
+                <h2 class="h5 mb-0">{{ bid.freelancer.username }}</h2>
+                <span class="badge-soft">{% if bid.accepted %}Accepted{% else %}Pending{% endif %}</span>
+            </div>
+            <p class="fw-bold">Rs. {{ bid.amount }} - {{ bid.delivery_days }} days</p>
+            <p class="muted">{{ bid.proposal }}</p>
+            {% if bid.resume %}
+                <p class="mb-3"><a href="{{ bid.resume.url }}" target="_blank" class="badge-soft text-decoration-none">📄 View Resume</a></p>
+            {% elif bid.freelancer.profile.resume %}
+                <p class="mb-3"><a href="{{ bid.freelancer.profile.resume.url }}" target="_blank" class="badge-soft text-decoration-none">📄 View Resume</a></p>
+            {% endif %}
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="{% url 'chat' project.id bid.freelancer.id %}" class="btn-app secondary">Chat</a>
+                {% if not bid.accepted %}
+                    <a href="{% url 'accept_bid' bid.id %}" class="btn-app">Accept Bid</a>
+                {% endif %}
+            </div>
+        </article>
+    {% empty %}
+        <div class="panel">
+            <p class="muted mb-0">No bids received yet.</p>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

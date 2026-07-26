@@ -1,0 +1,329 @@
+{% extends "marketplace/base.html" %}
+
+{% block title %}Payment - FreelanceX{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card-wrapper {
+        perspective: 1000px;
+        margin-bottom: 28px;
+    }
+    
+    .credit-card {
+        width: 100%;
+        height: 210px;
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        position: relative;
+        padding: 24px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        color: #f8fafc;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: var(--transition);
+    }
+
+    .credit-card::before {
+        content: '';
+        position: absolute;
+        top: -60%;
+        left: -60%;
+        width: 220%;
+        height: 220%;
+        background: radial-gradient(circle, rgba(6, 182, 212, 0.15) 0%, transparent 60%);
+        pointer-events: none;
+    }
+
+    .card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+
+    .card-chip {
+        width: 48px;
+        height: 36px;
+        background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%);
+        border-radius: 6px;
+        position: relative;
+        box-shadow: inset 0 1px 2px rgba(255,255,255,0.3);
+    }
+
+    .card-chip::after {
+        content: '';
+        position: absolute;
+        top: 25%;
+        left: 25%;
+        width: 50%;
+        height: 50%;
+        border: 1px solid rgba(0,0,0,0.15);
+        border-radius: 2px;
+    }
+
+    .card-brand-logo {
+        font-weight: 800;
+        font-style: italic;
+        font-size: 20px;
+        color: rgba(255, 255, 255, 0.85);
+        letter-spacing: -1px;
+    }
+
+    .card-number-display {
+        font-size: 22px;
+        letter-spacing: 3px;
+        font-family: 'Courier New', Courier, monospace;
+        margin-top: 20px;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        text-align: center;
+    }
+
+    .card-bottom {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+    }
+
+    .card-holder-label {
+        font-size: 9px;
+        text-transform: uppercase;
+        color: var(--muted);
+        letter-spacing: 1px;
+        margin-bottom: 2px;
+    }
+
+    .card-holder-name {
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        font-weight: 500;
+        max-width: 220px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .card-expiry-label {
+        font-size: 9px;
+        text-transform: uppercase;
+        color: var(--muted);
+        letter-spacing: 1px;
+        margin-bottom: 2px;
+        text-align: right;
+    }
+
+    .card-expiry {
+        font-size: 14px;
+        font-family: monospace;
+        letter-spacing: 1px;
+        text-align: right;
+    }
+
+    .form-dark-label {
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 6px;
+    }
+
+    .input-dark {
+        background: rgba(30, 41, 59, 0.5) !important;
+        border: 1px solid var(--line) !important;
+        color: var(--text) !important;
+        border-radius: 8px !important;
+        padding: 10px 14px !important;
+        font-size: 14px !important;
+        transition: var(--transition) !important;
+    } 
+
+    .input-dark:focus {
+        border-color: var(--accent) !important;
+        box-shadow: 0 0 10px var(--accent-glow) !important;
+        outline: none !important;
+    }
+
+    .simulator-badge {
+        font-size: 11px;
+        background: rgba(245, 158, 11, 0.1);
+        border: 1px solid rgba(245, 158, 11, 0.2);
+        color: var(--accent-2);
+        padding: 4px 8px;
+        border-radius: 6px;
+        display: inline-block;
+        margin-bottom: 12px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-5 col-md-8">
+        <div class="panel">
+            {% if is_mock %}
+                <div class="text-center mb-4">
+                    <span class="simulator-badge"><i class="bi bi-shield-slash-fill me-1"></i> Sandbox Test Mode</span>
+                    <h1 class="h3 mb-1">Secure Payment Simulator</h1>
+                    <p class="muted small mb-0">Project: <strong>{{ project.title }}</strong></p>
+                </div>
+
+                <!-- Interactive Credit Card Visualizer -->
+                <div class="card-wrapper">
+                    <div class="credit-card">
+                        <div class="card-top">
+                            <div class="card-chip"></div>
+                            <div class="card-brand-logo"><i class="bi bi-credit-card-2-front text-info"></i> Visa</div>
+                        </div>
+                        <div class="card-number-display" id="cc-num-display">•••• •••• •••• ••••</div>
+                        <div class="card-bottom">
+                            <div>
+                                <div class="card-holder-label">Card Holder</div>
+                                <div class="card-holder-name" id="cc-name-display">YOUR NAME</div>
+                            </div>
+                            <div>
+                                <div class="card-expiry-label">Expires</div>
+                                <div class="card-expiry" id="cc-expiry-display">MM/YY</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Simulator Form -->
+                <form id="payment-form" method="POST" action="{% url 'payment_callback' project.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="is_mock" value="true">
+                    <input type="hidden" name="razorpay_order_id" value="{{ payment.id }}">
+                    <input type="hidden" name="razorpay_payment_id" id="mock-payment-id">
+
+                    <div class="mb-3">
+                        <label class="form-dark-label">Card Number</label>
+                        <input type="text" id="cc-num-input" class="form-control input-dark" placeholder="4111 2222 3333 4444" maxlength="19" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-dark-label">Cardholder Name</label>
+                        <input type="text" id="cc-name-input" class="form-control input-dark" placeholder="John Doe" maxlength="22" required>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-6">
+                            <label class="form-dark-label">Expiration Date</label>
+                            <input type="text" id="cc-expiry-input" class="form-control input-dark" placeholder="MM/YY" maxlength="5" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-dark-label">CVV / CVC</label>
+                            <input type="password" id="cc-cvv-input" class="form-control input-dark" placeholder="•••" maxlength="3" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-app w-100 py-3"><i class="bi bi-shield-check me-2"></i>Pay Rs. {{ amount }}</button>
+                    <a href="{% url 'client_dashboard' %}" class="btn-app secondary w-100 mt-2 py-3"><i class="bi bi-x-lg me-2"></i>Cancel</a>
+                </form>
+
+            {% else %}
+                <div class="text-center py-4">
+                    <div class="eyebrow mb-2"><i class="bi bi-shield-fill-check text-success me-1"></i> Secure checkout</div>
+                    <h1 class="h3 mb-2">Complete Payment</h1>
+                    <p class="muted mb-4">Project: <strong>{{ project.title }}</strong></p>
+                    <div class="p-4 card-dark mb-4 text-center">
+                        <p class="muted mb-1 small">Total Bill</p>
+                        <h2 class="display-6 fw-bold text-white mb-0">Rs. {{ amount }}</h2>
+                    </div>
+                    <button id="pay-btn" class="btn-app w-100 py-3"><i class="bi bi-credit-card me-2"></i>Pay via Razorpay</button>
+                    <a href="{% url 'client_dashboard' %}" class="btn-app secondary w-100 mt-2 py-3"><i class="bi bi-arrow-left me-2"></i>Back to Dashboard</a>
+                </div>
+
+                <form id="razorpay-form" method="POST" action="{% url 'payment_callback' project.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="is_mock" value="false">
+                    <input type="hidden" name="razorpay_order_id" id="rzp-order-id">
+                    <input type="hidden" name="razorpay_payment_id" id="rzp-payment-id">
+                    <input type="hidden" name="razorpay_signature" id="rzp-signature">
+                </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if is_mock %}
+<script>
+    // Visual Simulator Interactions
+    const ccNumInput = document.getElementById('cc-num-input');
+    const ccNameInput = document.getElementById('cc-name-input');
+    const ccExpiryInput = document.getElementById('cc-expiry-input');
+    const ccCVVInput = document.getElementById('cc-cvv-input');
+
+    const ccNumDisplay = document.getElementById('cc-num-display');
+    const ccNameDisplay = document.getElementById('cc-name-display');
+    const ccExpiryDisplay = document.getElementById('cc-expiry-display');
+
+    ccNumInput.addEventListener('input', function (e) {
+        let value = e.target.value.replace(/\D/g, '');
+        // Format to 4-digit groups
+        let formattedValue = '';
+        for (let i = 0; i < value.length; i++) {
+            if (i > 0 && i % 4 === 0) {
+                formattedValue += ' ';
+            }
+            formattedValue += value[i];
+        }
+        e.target.value = formattedValue;
+        ccNumDisplay.innerText = formattedValue || '•••• •••• •••• ••••';
+    });
+
+    ccNameInput.addEventListener('input', function (e) {
+        ccNameDisplay.innerText = e.target.value.toUpperCase() || 'YOUR NAME';
+    });
+
+    ccExpiryInput.addEventListener('input', function (e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length > 2) {
+            value = value.substring(0, 2) + '/' + value.substring(2);
+        }
+        e.target.value = value;
+        ccExpiryDisplay.innerText = value || 'MM/YY';
+    });
+
+    // Handle Form Submit
+    document.getElementById('payment-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+        
+        // Generate random mock payment ID
+        const randHex = () => Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+        const mockPayId = "pay_mock_" + randHex() + randHex() + randHex();
+        document.getElementById('mock-payment-id').value = mockPayId;
+
+        // Submit form
+        this.submit();
+    });
+</script>
+{% else %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    const options = {
+        key: "{{ razorpay_key }}",
+        amount: "{{ payment.amount }}",
+        currency: "INR",
+        name: "FreelanceX",
+        description: "Project Payment",
+        order_id: "{{ payment.id }}",
+        handler: function (response) {
+            document.getElementById('rzp-order-id').value = response.razorpay_order_id;
+            document.getElementById('rzp-payment-id').value = response.razorpay_payment_id;
+            document.getElementById('rzp-signature').value = response.razorpay_signature;
+            document.getElementById('razorpay-form').submit();
+        },
+        theme: { color: "#06b6d4" }
+    };
+
+    const razorpay = new Razorpay(options);
+    document.getElementById("pay-btn").addEventListener("click", function (event) {
+        event.preventDefault();
+        razorpay.open();
+    });
+</script>
+{% endif %}
+{% endblock %}

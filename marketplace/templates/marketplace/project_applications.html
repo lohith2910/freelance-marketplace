@@ -1,0 +1,33 @@
+{% extends "marketplace/base.html" %}
+
+{% block title %}Applications - FreelanceX{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <div class="eyebrow">Applications</div>
+        <h1>{{ project.title }}</h1>
+        <p class="muted mb-0">Review freelancers who used quick apply.</p>
+    </div>
+    <a href="{% url 'client_dashboard' %}" class="btn-app secondary">Back</a>
+</div>
+
+<div class="grid">
+    {% for application in applications %}
+        <article class="card-dark">
+            <h2 class="h5">{{ application.freelancer.username }}</h2>
+            <p class="muted">Applied {{ application.applied_at|date:"M d, Y H:i" }}</p>
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="{% url 'chat' project.id application.freelancer.id %}" class="btn-app secondary">Chat</a>
+                {% if application.freelancer.profile.resume %}
+                    <a href="{{ application.freelancer.profile.resume.url }}" class="btn-app" target="_blank" rel="noopener">Resume</a>
+                {% endif %}
+            </div>
+        </article>
+    {% empty %}
+        <div class="panel">
+            <p class="muted mb-0">No applications received yet.</p>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

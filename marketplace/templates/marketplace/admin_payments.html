@@ -1,0 +1,171 @@
+{% extends "marketplace/base.html" %}
+
+{% block title %}{{ title }} - Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .btn-tab {
+        transition: var(--transition);
+        border: 1px solid var(--line);
+        background: transparent;
+        color: var(--muted);
+    }
+
+    .btn-tab:hover,
+    .btn-tab.active {
+        background: var(--panel-2);
+        color: var(--text);
+        border-color: var(--accent);
+    }
+
+    .table-dark {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        margin-top: 20px;
+    }
+
+    .table-dark th {
+        background: var(--panel-2);
+        border-bottom: 2px solid var(--line);
+        color: var(--muted);
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 12px;
+        letter-spacing: 0.5px;
+        padding: 16px 20px;
+    }
+
+    .table-dark td {
+        border-bottom: 1px solid var(--line);
+        padding: 16px 20px;
+        vertical-align: middle;
+        font-size: 14px;
+    }
+
+    .table-dark tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .status-badge {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 4px 10px;
+        border-radius: 999px;
+    }
+
+    .status-badge.completed {
+        background: rgba(16, 185, 129, 0.12);
+        color: var(--success);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .status-badge.pending {
+        background: rgba(245, 158, 11, 0.12);
+        color: var(--accent-2);
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .status-badge.failed {
+        background: rgba(239, 68, 68, 0.12);
+        color: var(--danger);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <div class="eyebrow"><i class="bi bi-wallet2"></i> Payment ledger</div>
+        <h1>{{ title }}</h1>
+        <p class="muted mb-0">Monitor platform transactions, verify payment statuses, and view invoice IDs.</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="{% url 'admin_payments' %}" class="btn-app btn-tab {% if selected_status == 'all' or not selected_status %}active{% endif %}">
+            All
+        </a>
+        <a href="{% url 'admin_payments' %}?status=Completed" class="btn-app btn-tab {% if selected_status == 'Completed' %}active{% endif %}">
+            <i class="bi bi-check-circle text-success me-1"></i> Completed
+        </a>
+        <a href="{% url 'admin_payments' %}?status=Pending" class="btn-app btn-tab {% if selected_status == 'Pending' %}active{% endif %}">
+            <i class="bi bi-clock-history text-warning me-1"></i> Pending
+        </a>
+        <a href="{% url 'admin_payments' %}?status=Failed" class="btn-app btn-tab {% if selected_status == 'Failed' %}active{% endif %}">
+            <i class="bi bi-x-circle text-danger me-1"></i> Failed
+        </a>
+        <a href="{% url 'admin_dashboard' %}" class="btn-app secondary">
+            <i class="bi bi-arrow-left"></i> Dashboard
+        </a>
+    </div>
+</div>
+
+<div class="table-responsive table-dark">
+    <table class="table table-borderless text-white mb-0">
+        <thead>
+            <tr>
+                <th>Project</th>
+                <th>Client</th>
+                <th>Freelancer</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Transaction Reference</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for payment in payments %}
+                <tr>
+                    <td>
+                        <strong class="d-block">{{ payment.project.title }}</strong>
+                        <span class="text-muted small">ID: #{{ payment.project.id }}</span>
+                    </td>
+                    <td>
+                        <span>{{ payment.client.username }}</span>
+                    </td>
+                    <td>
+                        <span>{{ payment.freelancer.username }}</span>
+                    </td>
+                    <td>
+                        <strong class="text-info">Rs. {{ payment.amount }}</strong>
+                    </td>
+                    <td>
+                        {% if payment.status == 'Completed' %}
+                            <span class="status-badge completed"><i class="bi bi-check-circle-fill"></i> Success</span>
+                        {% elif payment.status == 'Pending' %}
+                            <span class="status-badge pending"><i class="bi bi-clock"></i> Pending</span>
+                        {% else %}
+                            <span class="status-badge failed"><i class="bi bi-x-circle-fill"></i> Failed</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="small">
+                            {% if payment.razorpay_payment_id %}
+                                <div class="text-white"><i class="bi bi-receipt me-1"></i>{{ payment.razorpay_payment_id }}</div>
+                            {% endif %}
+                            {% if payment.razorpay_order_id %}
+                                <div class="text-muted"><i class="bi bi-file-earmark-text me-1"></i>{{ payment.razorpay_order_id }}</div>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td>
+                        <span class="text-muted small">{{ payment.created_at|date:"M d, Y H:i" }}</span>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center py-5">
+                        <i class="bi bi-wallet-fill text-muted fs-1 mb-2 d-block"></i>
+                        <p class="muted mb-0">No transaction records found matching the criteria.</p>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends "marketplace/base.html" %}
+
+{% block title %}Applications - Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .app-card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: var(--border-radius);
+        padding: 24px;
+        transition: var(--transition);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 250px;
+    }
+
+    .app-card:hover {
+        border-color: var(--accent);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px var(--accent-glow);
+        transform: translateY(-3px);
+    }
+
+    .app-avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: rgba(6, 182, 212, 0.1);
+        border: 1px solid rgba(6, 182, 212, 0.2);
+        color: var(--accent);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 16px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <div class="eyebrow"><i class="bi bi-file-earmark-person"></i> Platform quick applies</div>
+        <h1>All Applications</h1>
+        <p class="muted mb-0">Browse and manage simple role expressions and applications submitted by freelancer accounts.</p>
+    </div>
+    <a href="{% url 'admin_dashboard' %}" class="btn-app secondary">
+        <i class="bi bi-arrow-left"></i> Dashboard
+    </a>
+</div>
+
+<div class="grid">
+    {% for application in applications %}
+        <article class="app-card">
+            <div>
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="app-avatar">
+                        {{ application.freelancer.username|slice:":2"|upper }}
+                    </div>
+                    <div>
+                        <h2 class="h5 mb-0 text-white">{{ application.freelancer.username }}</h2>
+                        <span class="muted small"><i class="bi bi-calendar3 me-1"></i>Applied {{ application.applied_at|date:"M d, Y - H:i" }}</span>
+                    </div>
+                </div>
+                
+                <div class="p-3 bg-dark bg-opacity-25 rounded border border-secondary border-opacity-25 mb-3">
+                    <span class="muted small d-block mb-1">Target Project</span>
+                    <strong class="text-white">{{ application.project.title }}</strong>
+                    <div class="mt-2 text-muted small">
+                        Client: <strong class="text-white">{{ application.project.client.username }}</strong>
+                    </div>
+                </div>
+            </div>
+
+            <a href="{% url 'project_detail' application.project.id %}" class="btn-app secondary w-100">
+                <i class="bi bi-eye"></i> View Project details
+            </a>
+        </article>
+    {% empty %}
+        <div class="col-12 text-center py-5">
+            <div class="panel">
+                <i class="bi bi-file-x text-muted fs-1 mb-2"></i>
+                <p class="muted mb-0">No applications found.</p>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

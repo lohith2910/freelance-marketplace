@@ -1,0 +1,107 @@
+{% extends "marketplace/base.html" %}
+
+{% block title %}Login - FreelanceX{% endblock %}
+
+{% block extra_css %}
+<style>
+    .role-selector {
+        position: relative;
+        background: var(--panel-2);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 4px;
+        margin-bottom: 24px;
+        z-index: 1;
+        display: flex;
+        height: 46px;
+        align-items: center;
+    }
+
+    .role-selector input[type="radio"] {
+        display: none;
+    }
+
+    .role-options-wrapper {
+        display: flex;
+        width: 100%;
+        height: 100%;
+        position: relative;
+        z-index: 3;
+    }
+
+    .role-label {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--muted);
+        cursor: pointer;
+        transition: color 0.3s ease;
+        margin-bottom: 0;
+        height: 100%;
+    }
+
+    /* Active label text color changes */
+    #role_client:checked ~ .role-options-wrapper #label_client {
+        color: #04111c;
+    }
+    #role_freelancer:checked ~ .role-options-wrapper #label_freelancer {
+        color: #04111c;
+    }
+
+    /* Sliding pill background indicator */
+    .selector-indicator {
+        position: absolute;
+        top: 4px;
+        bottom: 4px;
+        left: 4px;
+        width: calc(50% - 6px);
+        background: var(--accent);
+        border-radius: 6px;
+        transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 2;
+    }
+
+    /* Translate indicator based on checked radio button */
+    #role_client:checked ~ .selector-indicator {
+        transform: translateX(0);
+    }
+    #role_freelancer:checked ~ .selector-indicator {
+        transform: translateX(100%);
+        background: var(--accent-hover);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-5">
+        <div class="panel">
+            <div class="eyebrow">Welcome back</div>
+            <h1 class="mb-4">Login</h1>
+            <form method="POST">
+                {% csrf_token %}
+                
+                <div class="role-selector">
+                    <input type="radio" name="login_role" id="role_client" value="client" {% if selected_role == "client" or not selected_role %}checked{% endif %}>
+                    <input type="radio" name="login_role" id="role_freelancer" value="freelancer" {% if selected_role == "freelancer" %}checked{% endif %}>
+                    
+                    <div class="role-options-wrapper">
+                        <label for="role_client" class="role-label" id="label_client">Client</label>
+                        <label for="role_freelancer" class="role-label" id="label_freelancer">Freelancer</label>
+                    </div>
+                    <div class="selector-indicator"></div>
+                </div>
+
+                {{ form.as_p }}
+                <button type="submit" class="btn-app w-100">Login</button>
+            </form>
+            <p class="muted text-center mt-4 mb-0">
+                New user? <a href="{% url 'register' %}">Create account</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

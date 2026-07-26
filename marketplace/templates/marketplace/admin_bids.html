@@ -1,0 +1,153 @@
+{% extends "marketplace/base.html" %}
+
+{% block title %}Bids - Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .bid-card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: var(--border-radius);
+        padding: 24px;
+        transition: var(--transition);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 290px;
+    }
+
+    .bid-card:hover {
+        border-color: var(--accent);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px var(--accent-glow);
+        transform: translateY(-3px);
+    }
+
+    .bid-status {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 4px 10px;
+        border-radius: 999px;
+    }
+
+    .bid-status.pending {
+        background: rgba(245, 158, 11, 0.12);
+        color: var(--accent-2);
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .bid-status.accepted {
+        background: rgba(16, 185, 129, 0.12);
+        color: var(--success);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .bid-amount-bar {
+        background: var(--panel-2);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin-bottom: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .resume-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(6, 182, 212, 0.1);
+        color: var(--accent);
+        border: 1px solid rgba(6, 182, 212, 0.2);
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: var(--transition);
+        margin-bottom: 12px;
+    }
+
+    .resume-btn:hover {
+        background: var(--accent);
+        color: #04111c;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <div class="eyebrow"><i class="bi bi-cash-stack"></i> Submitted proposals</div>
+        <h1>All Bids</h1>
+        <p class="muted mb-0">Review all active freelancer offers, financial quotes, and delivery periods.</p>
+    </div>
+    <a href="{% url 'admin_dashboard' %}" class="btn-app secondary">
+        <i class="bi bi-arrow-left"></i> Dashboard
+    </a>
+</div>
+
+<div class="grid">
+    {% for bid in bids %}
+        <article class="bid-card">
+            <div>
+                <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+                    <h2 class="h5 mb-0 text-white"><i class="bi bi-person me-2 text-muted"></i>{{ bid.freelancer.username }}</h2>
+                    {% if bid.accepted %}
+                        <span class="bid-status accepted"><i class="bi bi-check-circle-fill"></i> Accepted</span>
+                    {% else %}
+                        <span class="bid-status pending"><i class="bi bi-hourglass-split"></i> Pending</span>
+                    {% endif %}
+                </div>
+                
+                <div class="bid-amount-bar">
+                    <div>
+                        <span class="d-block muted small">Quote</span>
+                        <strong class="text-success fs-5">Rs. {{ bid.amount }}</strong>
+                    </div>
+                    <div class="text-end">
+                        <span class="d-block muted small">Duration</span>
+                        <strong class="text-white"><i class="bi bi-calendar-event me-1 text-muted"></i>{{ bid.delivery_days }} days</strong>
+                    </div>
+                </div>
+
+                <div class="mb-3 d-flex justify-content-between align-items-center">
+                    <span class="small text-muted">Plagiarism Analysis</span>
+                    <span class="badge {% if bid.plagiarism_percentage == 0 %}bg-success{% else %}bg-danger{% endif %} text-white">{{ bid.plagiarism_percentage }}% Plagiarism</span>
+                </div>
+
+                <p class="muted small mb-3">{{ bid.proposal|truncatewords:24 }}</p>
+            </div>
+
+            <div>
+                {% if bid.resume %}
+                    <a href="{{ bid.resume.url }}" target="_blank" class="resume-btn">
+                        <i class="bi bi-file-earmark-pdf"></i> View Resume
+                    </a>
+                {% elif bid.freelancer.profile.resume %}
+                    <a href="{{ bid.freelancer.profile.resume.url }}" target="_blank" class="resume-btn">
+                        <i class="bi bi-file-earmark-pdf"></i> View Resume
+                    </a>
+                {% endif %}
+
+                <div class="pt-3 border-top border-secondary mt-2">
+                    <p class="muted small mb-1">Project: <strong class="text-white">{{ bid.project.title }}</strong></p>
+                    <p class="muted small mb-3">Client: <strong class="text-white">{{ bid.project.client.username }}</strong></p>
+                    <a href="{% url 'project_detail' bid.project.id %}" class="btn-app secondary w-100">
+                        <i class="bi bi-eye"></i> View Project details
+                    </a>
+                </div>
+            </div>
+        </article>
+    {% empty %}
+        <div class="col-12 text-center py-5">
+            <div class="panel">
+                <i class="bi bi-cash text-muted fs-1 mb-2"></i>
+                <p class="muted mb-0">No bids found.</p>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

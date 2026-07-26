@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}FreelanceX{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0b1523;
+            --panel: #121f35;
+            --panel-2: #1c2c47;
+            --line: #2d456a;
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --accent: #06b6d4;
+            --accent-hover: #0891b2;
+            --accent-glow: rgba(6, 182, 212, 0.15);
+            --accent-2: #f59e0b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --border-radius: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--line);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent);
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Poppins", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        a { color: inherit; }
+
+        .app-shell {
+            min-height: 100vh;
+            display: grid;
+            grid-template-rows: auto 1fr;
+        }
+
+        .top-nav {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            padding: 16px 7vw;
+            background: rgba(11, 21, 35, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--line);
+        }
+
+        .brand {
+            color: var(--accent);
+            font-size: 24px;
+            font-weight: 700;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+        
+        .brand:hover {
+            color: var(--text);
+            text-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-links a:hover { 
+            color: var(--accent);
+        }
+
+        .page {
+            width: min(1180px, 86vw);
+            margin: 0 auto;
+            padding: 42px 0 64px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 28px;
+            border-bottom: 1px solid var(--line);
+            padding-bottom: 20px;
+        }
+
+        .eyebrow {
+            color: var(--accent);
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
+        }
+
+        h1, h2, h3 { letter-spacing: 0; font-weight: 700; }
+
+        .muted { color: var(--muted); }
+
+        .panel,
+        .card-dark {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: var(--border-radius);
+            padding: 24px;
+            transition: var(--transition);
+        }
+
+        .panel:hover,
+        .card-dark:hover {
+            border-color: var(--accent);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px var(--accent-glow);
+            transform: translateY(-2px);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 18px;
+        }
+
+        .stat {
+            min-height: 130px;
+        }
+
+        .stat strong {
+            display: block;
+            color: var(--accent);
+            font-size: 36px;
+            line-height: 1;
+            margin-bottom: 12px;
+        }
+
+        .btn-app {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 42px;
+            padding: 10px 16px;
+            border: 0;
+            border-radius: 8px;
+            background: var(--accent);
+            color: #04111c;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .btn-app.secondary {
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--line);
+        }
+
+        .badge-soft {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(45, 212, 191, 0.14);
+            color: var(--accent);
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .form-control,
+        .form-select {
+            background: #eef4fb;
+            border: 1px solid #cbd5e1;
+            color: #0f172a;
+        }
+
+        .message-list {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            z-index: 40;
+            width: min(380px, calc(100vw - 40px));
+        }
+
+        @media (max-width: 760px) {
+            .top-nav,
+            .page-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .page { width: min(92vw, 1180px); }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+<div class="app-shell">
+    <nav class="top-nav">
+        <a href="{% url 'home' %}" class="brand"><i class="bi bi-lightning-charge-fill text-info animate-pulse"></i> FreelanceX</a>
+        <div class="nav-links">
+            <a href="{% url 'projects' %}"><i class="bi bi-search"></i> Projects</a>
+            {% if user.is_authenticated %}
+                {% if user_role == "admin" %}
+                    <a href="{% url 'admin_dashboard' %}"><i class="bi bi-shield-lock"></i> Admin</a>
+                    <a href="{% url 'client_dashboard' %}"><i class="bi bi-person-workspace"></i> Client View</a>
+                    <a href="{% url 'freelancer_dashboard' %}"><i class="bi bi-person-gear"></i> Freelancer View</a>
+                {% else %}
+                    <a href="{% url 'dashboard' %}"><i class="bi bi-grid-1x2"></i> Dashboard</a>
+                {% endif %}
+                <a href="{% url 'inbox' %}"><i class="bi bi-envelope"></i> Inbox</a>
+                <a href="{% url 'notifications' %}">
+                    <i class="bi bi-bell"></i> Notifications
+                    {% if notification_count > 0 %}
+                        <span class="badge rounded-pill bg-danger ms-1" style="font-size: 10px; padding: 3px 6px;">{{ notification_count }}</span>
+                    {% endif %}
+                </a>
+                <a href="{% url 'logout' %}"><i class="bi bi-box-arrow-right"></i> Logout</a>
+            {% else %}
+                <a href="{% url 'login' %}"><i class="bi bi-box-arrow-in-right"></i> Login</a>
+                <a href="{% url 'register' %}"><i class="bi bi-person-plus"></i> Register</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <main class="page">
+        {% block content %}{% endblock %}
+    </main>
+</div>
+
+{% if messages %}
+    <div class="message-list">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }} shadow-sm mb-2">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

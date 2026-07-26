@@ -1,0 +1,21 @@
+{% extends "marketplace/base.html" %}
+
+{% block title %}Place Bid - FreelanceX{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="panel">
+            <div class="eyebrow">Freelancer action</div>
+            <h1 class="mb-2">{% if existing_bid %}Update Bid{% else %}Place Bid{% endif %}</h1>
+            <p class="muted mb-4">{{ project.title }} - Client budget Rs. {{ project.budget }}</p>
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button class="btn-app" type="submit">Save Bid</button>
+                <a href="{% url 'project_detail' project.id %}" class="btn-app secondary ms-2">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends "marketplace/base.html" %}
+
+{% block title %}Chat - FreelanceX{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chat-window {
+        height: 520px;
+        overflow-y: auto;
+    }
+
+    .chat-message {
+        max-width: 72%;
+        padding: 14px 16px;
+        border-radius: 8px;
+        margin-bottom: 14px;
+        background: var(--panel-2);
+    }
+
+    .chat-message.sent {
+        margin-left: auto;
+        background: var(--accent);
+        color: #04111c;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <div class="eyebrow">Project chat</div>
+        <h1>{{ project.title }}</h1>
+        <p class="muted mb-0">Conversation with {{ receiver.username }}</p>
+    </div>
+    <a href="{% url 'dashboard' %}" class="btn-app secondary">Dashboard</a>
+</div>
+
+<div class="panel">
+    <div class="chat-window mb-4">
+        {% for message in messages %}
+            <div class="chat-message {% if message.sender == request.user %}sent{% endif %}">
+                <p class="mb-2">{{ message.content }}</p>
+                <small>{{ message.sender.username }} - {{ message.timestamp|date:"M d, Y H:i" }}</small>
+            </div>
+        {% empty %}
+            <p class="muted">No messages yet.</p>
+        {% endfor %}
+    </div>
+
+    <form method="POST" class="d-flex gap-2">
+        {% csrf_token %}
+        <input type="text" name="content" class="form-control" placeholder="Type your message..." required>
+        <button type="submit" class="btn-app">Send</button>
+    </form>
+</div>
+{% endblock %}

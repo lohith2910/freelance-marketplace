@@ -1,0 +1,166 @@
+{% extends "marketplace/base.html" %}
+
+{% block title %}{{ title }} - Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .user-card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: var(--border-radius);
+        padding: 24px;
+        transition: var(--transition);
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .user-card:hover {
+        border-color: var(--accent);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px var(--accent-glow);
+        transform: translateY(-3px);
+    }
+
+    .avatar-placeholder {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 22px;
+        margin-bottom: 16px;
+        background: linear-gradient(135deg, var(--accent) 0%, var(--panel-2) 100%);
+        color: #04111c;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .avatar-placeholder.client {
+        background: linear-gradient(135deg, #3b82f6 0%, var(--panel-2) 100%);
+        color: white;
+    }
+
+    .avatar-placeholder.freelancer {
+        background: linear-gradient(135deg, var(--success) 0%, var(--panel-2) 100%);
+        color: white;
+    }
+
+    .avatar-placeholder.admin {
+        background: linear-gradient(135deg, #a855f7 0%, var(--panel-2) 100%);
+        color: white;
+    }
+
+    .user-role-badge {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 4px 10px;
+        border-radius: 999px;
+        margin-top: 8px;
+    }
+
+    .user-role-badge.client {
+        background: rgba(59, 130, 246, 0.12);
+        color: #3b82f6;
+        border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+
+    .user-role-badge.freelancer {
+        background: rgba(16, 185, 129, 0.12);
+        color: #10b981;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .user-role-badge.admin {
+        background: rgba(168, 85, 247, 0.12);
+        color: #a855f7;
+        border: 1px solid rgba(168, 85, 247, 0.2);
+    }
+
+    .btn-tab {
+        transition: var(--transition);
+        border: 1px solid var(--line);
+        background: transparent;
+        color: var(--muted);
+    }
+
+    .btn-tab:hover,
+    .btn-tab.active {
+        background: var(--panel-2);
+        color: var(--text);
+        border-color: var(--accent);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <div class="eyebrow"><i class="bi bi-people"></i> Platform users</div>
+        <h1>{{ title }}</h1>
+        <p class="muted mb-0">Total system accounts registered on the platform.</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="{% url 'admin_users' %}" class="btn-app btn-tab {% if selected_role == 'all' %}active{% endif %}">
+            <i class="bi bi-person-fill"></i> All
+        </a>
+        <a href="{% url 'admin_users' %}?role=client" class="btn-app btn-tab {% if selected_role == 'client' %}active{% endif %}">
+            <i class="bi bi-person-workspace"></i> Clients
+        </a>
+        <a href="{% url 'admin_users' %}?role=freelancer" class="btn-app btn-tab {% if selected_role == 'freelancer' %}active{% endif %}">
+            <i class="bi bi-person-gear"></i> Freelancers
+        </a>
+        <a href="{% url 'admin_dashboard' %}" class="btn-app secondary">
+            <i class="bi bi-arrow-left"></i> Dashboard
+        </a>
+    </div>
+</div>
+
+<div class="grid">
+    {% for account in users %}
+        <article class="user-card">
+            {% if account.is_staff %}
+                <div class="avatar-placeholder admin">
+                    {{ account.username|slice:":2"|upper }}
+                </div>
+            {% elif account.profile.role == "client" %}
+                <div class="avatar-placeholder client">
+                    {{ account.username|slice:":2"|upper }}
+                </div>
+            {% else %}
+                <div class="avatar-placeholder freelancer">
+                    {{ account.username|slice:":2"|upper }}
+                </div>
+            {% endif %}
+            
+            <h2 class="h5 mb-1 text-white">{{ account.username }}</h2>
+            <p class="muted small mb-2"><i class="bi bi-envelope me-1"></i>{{ account.email|default:"No email address" }}</p>
+            
+            <div>
+                {% if account.is_staff %}
+                    <span class="user-role-badge admin">Admin</span>
+                {% elif account.profile.role == "client" %}
+                    <span class="user-role-badge client">Client</span>
+                {% else %}
+                    <span class="user-role-badge freelancer">Freelancer</span>
+                {% endif %}
+            </div>
+            
+            <div class="mt-4 pt-3 border-top border-secondary w-100 text-center">
+                <span class="muted small"><i class="bi bi-calendar3 me-1"></i>Joined {{ account.date_joined|date:"M d, Y" }}</span>
+            </div>
+        </article>
+    {% empty %}
+        <div class="col-12 text-center py-5">
+            <div class="panel">
+                <i class="bi bi-person-x text-muted fs-1 mb-2"></i>
+                <p class="muted mb-0">No users found matching the criteria.</p>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "marketplace/base.html" %}
+
+{% block title %}Inbox - FreelanceX{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <div class="eyebrow">Messages</div>
+        <h1>Your Inbox</h1>
+    </div>
+    <a href="{% url 'dashboard' %}" class="btn-app secondary">Dashboard</a>
+</div>
+
+<div class="grid">
+    {% for message in messages %}
+        <article class="card-dark">
+            <h2 class="h5">{{ message.sender.username }}</h2>
+            <p class="muted">{{ message.project.title }}</p>
+            <p>{{ message.content|truncatewords:24 }}</p>
+            <a href="{% url 'chat' message.project.id message.sender.id %}" class="btn-app secondary">Open Chat</a>
+        </article>
+    {% empty %}
+        <div class="panel">
+            <p class="muted mb-0">No messages yet.</p>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

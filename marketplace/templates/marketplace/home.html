@@ -1,0 +1,70 @@
+{% extends "marketplace/base.html" %}
+
+{% block title %}FreelanceX - Marketplace{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <div class="eyebrow">Final-year ready freelance marketplace</div>
+        <h1 class="display-4 fw-bold mt-2">Hire skilled freelancers and manage projects with confidence.</h1>
+        <p class="muted fs-5 mt-3">
+            Post projects, receive bids, accept talent, chat with users, and track every workflow from role-based dashboards.
+        </p>
+        <div class="d-flex gap-3 flex-wrap mt-4">
+            {% if user.is_authenticated %}
+                <a href="{% url 'dashboard' %}" class="btn-app">Open Dashboard</a>
+            {% else %}
+                <a href="{% url 'register' %}" class="btn-app">Create Account</a>
+            {% endif %}
+            <a href="{% url 'projects' %}" class="btn-app secondary">Explore Projects</a>
+        </div>
+    </div>
+</section>
+
+<section class="grid mb-5">
+    <div class="panel stat">
+        <strong>Secure</strong>
+        <p class="muted mb-0">Role checks protect client, freelancer, and admin workflows.</p>
+    </div>
+    <div class="panel stat">
+        <strong>Track</strong>
+        <p class="muted mb-0">Applications, bids, accepted work, inbox messages, and notifications stay visible.</p>
+    </div>
+    <div class="panel stat">
+        <strong>Pay</strong>
+        <p class="muted mb-0">Accepted projects can move into a Razorpay payment flow.</p>
+    </div>
+</section>
+
+<section>
+    <div class="page-header">
+        <div>
+            <div class="eyebrow">Open work</div>
+            <h2>Latest Projects</h2>
+        </div>
+        <a href="{% url 'projects' %}" class="btn-app secondary">View All</a>
+    </div>
+    <div class="grid">
+        {% for project in projects %}
+            <article class="card-dark">
+                <div class="d-flex justify-content-between gap-3 mb-3">
+                    <h3 class="h5 mb-0">{{ project.title }}</h3>
+                    <span class="badge-soft">Rs. {{ project.budget }}</span>
+                </div>
+                <p class="muted">{{ project.description|truncatewords:24 }}</p>
+                <div class="d-flex gap-2 flex-wrap mt-3">
+                    <a href="{% url 'project_detail' project.id %}" class="btn-app secondary"><i class="bi bi-eye"></i> View Details</a>
+                    {% if user_role == "freelancer" %}
+                        <a href="{% url 'quick_apply' project.id %}" class="btn-app secondary"><i class="bi bi-lightning-charge"></i> Quick Apply</a>
+                        <a href="{% url 'place_bid' project.id %}" class="btn-app"><i class="bi bi-cash-stack"></i> Place Bid</a>
+                    {% endif %}
+                </div>
+            </article>
+        {% empty %}
+            <div class="panel">
+                <p class="muted mb-0">No open projects yet.</p>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

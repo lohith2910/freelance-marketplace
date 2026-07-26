@@ -1,0 +1,108 @@
+{% extends "marketplace/base.html" %}
+
+{% block title %}Add Project - Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-panel {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: var(--border-radius);
+        padding: 36px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    form p {
+        margin-bottom: 20px;
+    }
+
+    form label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: var(--text);
+        font-size: 14px;
+        letter-spacing: 0.02em;
+    }
+
+    form input,
+    form select,
+    form textarea {
+        width: 100%;
+        padding: 12px 16px;
+        background: var(--panel-2) !important;
+        border: 1px solid var(--line) !important;
+        color: var(--text) !important;
+        border-radius: 8px;
+        font-family: inherit;
+        font-size: 14px;
+        transition: var(--transition);
+    }
+
+    form input:focus,
+    form select:focus,
+    form textarea:focus {
+        border-color: var(--accent) !important;
+        outline: none;
+        box-shadow: 0 0 0 3px var(--accent-glow) !important;
+    }
+
+    form select {
+        cursor: pointer;
+    }
+
+    form textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    .helptext {
+        display: block;
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 6px;
+    }
+
+    .errorlist {
+        list-style-type: none;
+        padding-left: 0;
+        margin-bottom: 12px;
+        color: var(--danger);
+        font-size: 13px;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="form-panel">
+            <div class="eyebrow"><i class="bi bi-plus-circle-fill"></i> Admin creation</div>
+            <h1 class="mb-2 h2 text-white">Add Project For Client</h1>
+            <p class="muted mb-4 small">Create a new freelance job posting on behalf of any client registered on the platform.</p>
+            
+            <form method="POST">
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+                
+                {{ form.as_p }}
+                
+                <div class="mt-4 pt-3 border-top border-secondary d-flex gap-2">
+                    <button type="submit" class="btn-app">
+                        <i class="bi bi-check-lg me-1"></i> Create Project
+                    </button>
+                    <a href="{% url 'admin_projects' %}" class="btn-app secondary">
+                        <i class="bi bi-x-lg me-1"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

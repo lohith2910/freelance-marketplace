@@ -1,0 +1,237 @@
+{% extends "marketplace/base.html" %}
+
+{% block title %}Admin Dashboard - FreelanceX{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stat-card {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: var(--border-radius);
+        padding: 24px;
+        background: linear-gradient(135deg, var(--panel) 0%, rgba(20, 35, 58, 0.7) 100%);
+        transition: var(--transition);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 140px;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--accent);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.4), 0 0 20px var(--accent-glow);
+    }
+    
+    .stat-card-icon {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 32px;
+        opacity: 0.15;
+        color: var(--accent);
+        transition: var(--transition);
+    }
+    
+    .stat-card:hover .stat-card-icon {
+        opacity: 0.45;
+        transform: scale(1.15) rotate(5deg);
+    }
+
+    .stat-card-number {
+        font-size: 36px;
+        font-weight: 700;
+        color: var(--text);
+        line-height: 1.1;
+        margin-bottom: 8px;
+    }
+
+    .stat-card-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .recent-list-item {
+        transition: var(--transition);
+    }
+
+    .recent-list-item:hover {
+        transform: translateX(4px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <div class="eyebrow"><i class="bi bi-shield-check"></i> Platform control</div>
+        <h1 class="h2">Admin Dashboard</h1>
+        <p class="muted mb-0">Monitor platform metrics, manage users, projects, bids, and system workflows.</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="{% url 'admin_add_project' %}" class="btn-app"><i class="bi bi-plus-lg me-1"></i> Add Project</a>
+        <a href="{% url 'admin_payments' %}" class="btn-app secondary"><i class="bi bi-wallet2 me-1"></i> Ledger</a>
+        <a href="/admin/" class="btn-app secondary" target="_blank"><i class="bi bi-database me-1"></i> Django Admin</a>
+    </div>
+</div>
+
+<h3 class="h5 mb-3"><i class="bi bi-graph-up-arrow text-info me-2"></i>Platform Overview</h3>
+<div class="grid mb-4">
+    <a class="stat-card text-decoration-none" href="{% url 'admin_users' %}">
+        <div class="stat-card-icon"><i class="bi bi-people"></i></div>
+        <span class="stat-card-number">{{ total_users }}</span>
+        <span class="stat-card-title">Total Users</span>
+    </a>
+    <a class="stat-card text-decoration-none" href="{% url 'admin_users' %}?role=client">
+        <div class="stat-card-icon"><i class="bi bi-person-workspace"></i></div>
+        <span class="stat-card-number text-info">{{ total_clients }}</span>
+        <span class="stat-card-title">Clients</span>
+    </a>
+    <a class="stat-card text-decoration-none" href="{% url 'admin_users' %}?role=freelancer">
+        <div class="stat-card-icon"><i class="bi bi-person-gear"></i></div>
+        <span class="stat-card-number text-success">{{ total_freelancers }}</span>
+        <span class="stat-card-title">Freelancers</span>
+    </a>
+    <a class="stat-card text-decoration-none" href="{% url 'admin_projects' %}">
+        <div class="stat-card-icon"><i class="bi bi-briefcase"></i></div>
+        <span class="stat-card-number text-primary">{{ total_projects }}</span>
+        <span class="stat-card-title">Projects</span>
+    </a>
+</div>
+
+<h3 class="h5 mb-3"><i class="bi bi-currency-dollar text-success me-2"></i>Financial & Work metrics</h3>
+<div class="grid mb-5">
+    <a class="stat-card text-decoration-none" href="{% url 'admin_payments' %}?status=Completed">
+        <div class="stat-card-icon"><i class="bi bi-cash-coin"></i></div>
+        <span class="stat-card-number text-success">Rs. {{ total_revenue }}</span>
+        <span class="stat-card-title">Total Revenue</span>
+    </a>
+    <a class="stat-card text-decoration-none" href="{% url 'admin_payments' %}?status=Completed">
+        <div class="stat-card-icon"><i class="bi bi-check-circle"></i></div>
+        <span class="stat-card-number text-info">{{ completed_payments_count }}</span>
+        <span class="stat-card-title">Paid Transactions</span>
+    </a>
+    <a class="stat-card text-decoration-none" href="{% url 'admin_payments' %}?status=Pending">
+        <div class="stat-card-icon"><i class="bi bi-hourglass-split"></i></div>
+        <span class="stat-card-number text-warning">{{ pending_payments_count }}</span>
+        <span class="stat-card-title">Pending Escrows</span>
+    </a>
+    <a class="stat-card text-decoration-none" href="{% url 'admin_projects' %}?status=accepted">
+        <div class="stat-card-icon"><i class="bi bi-folder-check"></i></div>
+        <span class="stat-card-number text-primary">{{ accepted_projects }}</span>
+        <span class="stat-card-title">Accepted Jobs</span>
+    </a>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-6">
+        <section class="panel h-100">
+            <div class="d-flex justify-content-between align-items-center gap-3 mb-4">
+                <h2 class="h4 mb-0"><i class="bi bi-clock-history text-info me-2"></i>Recent Projects</h2>
+                <a href="{% url 'admin_projects' %}" class="btn-app secondary btn-sm"><i class="bi bi-eye"></i> View All</a>
+            </div>
+            <div class="d-grid gap-3">
+                {% for project in recent_projects %}
+                    <article class="card-dark recent-list-item d-flex justify-content-between align-items-center gap-3 p-3 border-start border-4 border-info">
+                        <div>
+                            <h3 class="h6 mb-1 text-white">{{ project.title }}</h3>
+                            <span class="text-muted small">Client: <strong>{{ project.client.username }}</strong></span>
+                        </div>
+                        <div class="text-end d-flex align-items-center gap-3">
+                            <span class="badge-soft px-3 py-2">Rs. {{ project.budget }}</span>
+                            <a href="{% url 'project_detail' project.id %}" class="btn-app secondary btn-sm px-2 py-1"><i class="bi bi-chevron-right"></i></a>
+                        </div>
+                    </article>
+                {% empty %}
+                    <div class="card-dark text-center py-4">
+                        <i class="bi bi-inbox text-muted fs-3 mb-2"></i>
+                        <p class="muted mb-0">No projects yet.</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+    <div class="col-lg-6">
+        <section class="panel h-100">
+            <div class="d-flex justify-content-between align-items-center gap-3 mb-4">
+                <h2 class="h4 mb-0"><i class="bi bi-piggy-bank text-warning me-2"></i>Recent Bids</h2>
+                <a href="{% url 'admin_bids' %}" class="btn-app secondary btn-sm"><i class="bi bi-eye"></i> View All</a>
+            </div>
+            <div class="d-grid gap-3">
+                {% for bid in recent_bids %}
+                    <article class="card-dark recent-list-item d-flex justify-content-between align-items-center gap-3 p-3 border-start border-4 border-warning">
+                        <div>
+                            <h3 class="h6 mb-1 text-white">{{ bid.freelancer.username }}</h3>
+                            <span class="text-muted small">Project: <strong>{{ bid.project.title }}</strong></span>
+                        </div>
+                        <div class="text-end d-flex align-items-center gap-3">
+                            <span class="badge-soft text-warning px-3 py-2">Rs. {{ bid.amount }}</span>
+                            <a href="{% url 'project_detail' bid.project.id %}" class="btn-app secondary btn-sm px-2 py-1"><i class="bi bi-chevron-right"></i></a>
+                        </div>
+                    </article>
+                {% empty %}
+                    <div class="card-dark text-center py-4">
+                        <i class="bi bi-inbox text-muted fs-3 mb-2"></i>
+                        <p class="muted mb-0">No bids yet.</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-12">
+        <section class="panel">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="h4 mb-0"><i class="bi bi-wallet2 text-success me-2"></i>Recent Transactions</h2>
+                <a href="{% url 'admin_payments' %}" class="btn-app secondary btn-sm"><i class="bi bi-eye"></i> View Ledger</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-borderless text-white mb-0">
+                    <thead>
+                        <tr class="border-bottom border-secondary" style="font-size: 12px; color: var(--muted); text-transform: uppercase;">
+                            <th>Project</th>
+                            <th>Client</th>
+                            <th>Freelancer</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for payment in recent_payments %}
+                            <tr class="align-middle">
+                                <td><strong>{{ payment.project.title }}</strong></td>
+                                <td>{{ payment.client.username }}</td>
+                                <td>{{ payment.freelancer.username }}</td>
+                                <td class="text-info font-weight-bold">Rs. {{ payment.amount }}</td>
+                                <td>
+                                    {% if payment.status == 'Completed' %}
+                                        <span class="badge-soft text-success px-2 py-1"><i class="bi bi-check-circle-fill"></i> Success</span>
+                                    {% else %}
+                                        <span class="badge-soft text-warning px-2 py-1"><i class="bi bi-clock"></i> Pending</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-muted small">{{ payment.created_at|date:"M d, Y H:i" }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center py-4">
+                                    <i class="bi bi-receipt-cutoff text-muted fs-3 mb-2 d-block"></i>
+                                    <p class="muted mb-0">No transaction records found.</p>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</div>
+
+{% endblock %}

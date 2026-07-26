@@ -1,0 +1,44 @@
+{% extends "marketplace/base.html" %}
+
+{% block title %}Projects - FreelanceX{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <div class="eyebrow">Marketplace</div>
+        <h1>Explore Projects</h1>
+        <p class="muted mb-0">Browse open client projects and submit an application or bid.</p>
+    </div>
+    {% if user_role == "client" %}
+        <a href="{% url 'add_project' %}" class="btn-app">Add Project</a>
+    {% elif user_role == "admin" %}
+        <a href="{% url 'admin_add_project' %}" class="btn-app">Add Project</a>
+    {% endif %}
+</div>
+
+<div class="grid">
+    {% for project in projects %}
+        <article class="card-dark">
+            <div class="d-flex justify-content-between gap-3 mb-3">
+                <h2 class="h5 mb-0">{{ project.title }}</h2>
+                <span class="badge-soft">Rs. {{ project.budget }}</span>
+            </div>
+            <p class="muted">{{ project.description|truncatewords:28 }}</p>
+            <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
+                <small class="muted">Client: {{ project.client.username }}</small>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="{% url 'project_detail' project.id %}" class="btn-app secondary">View Details</a>
+                    {% if user_role == "freelancer" %}
+                        <a href="{% url 'quick_apply' project.id %}" class="btn-app secondary">Quick Apply</a>
+                        <a href="{% url 'place_bid' project.id %}" class="btn-app">Place Bid</a>
+                    {% endif %}
+                </div>
+            </div>
+        </article>
+    {% empty %}
+        <div class="panel">
+            <p class="muted mb-0">No projects are open right now.</p>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
