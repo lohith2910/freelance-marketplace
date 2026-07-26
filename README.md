@@ -1,4 +1,4 @@
-──────────────────────────────────────
+
 🚀 Freelance Marketplace
 
 [Python] [Django] [MySQL] [Git] [License]
@@ -20,4 +20,4 @@ Professional Description
 🚀 Future Improvements
 
 👨‍💻 Author-Lohith Y
-──────────────────────────────────────
+
